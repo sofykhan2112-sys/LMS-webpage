@@ -50,62 +50,55 @@ const employeeBenefits = [
 const features = [
   {
     title: "Centralized Learning Platform",
-    body: "Manage cybersecurity training programs, learning materials, and assessments through a single intuitive dashboard.",
+   
     icon: BookOpenCheck
   },
   {
     title: "Role-Based Training",
-    body: "Deliver customized training modules tailored to employee roles, departments, and risk levels.",
+    
     icon: BrainCircuit
   },
   {
     title: "Real-Time Progress Tracking",
-    body: "Monitor learner participation, completion rates, assessment scores, and engagement through interactive dashboards.",
+    
     icon: BarChart3
   },
   {
     title: "Assessments & Quizzes",
-    body: "Evaluate employee understanding with knowledge checks, quizzes, and certification assessments.",
     icon: ClipboardCheck
   },
   {
     title: "Compliance Management",
-    body: "Maintain training records and generate reports to support audit and compliance requirements.",
+    
     icon: FileText
   },
   {
     title: "Automated Notifications",
-    body: "Keep employees engaged with automated reminders, course assignments, and training deadlines.",
+   
     icon: Zap
   },
   {
     title: "Anywhere, Anytime Learning",
-    body: "Enable employees to access training modules securely from desktop, tablet, or mobile devices.",
+   
     icon: UsersRound
   },
   {
     title: "Analytics & Reporting",
-    body: "Gain insights into training effectiveness and employee performance through detailed reporting.",
+    
     icon: Languages
   }
 ];
 
 const platformBenefits = [
-  ["Improve Security Awareness", "Equip employees with the knowledge needed to identify and respond to cyber threats confidently."],
-  ["Strengthen Compliance", "Support regulatory and compliance initiatives with documented training records and audit-ready reporting."],
-  ["Reduce Human Risk", "Minimize security incidents caused by human error through continuous education and reinforcement."],
-  ["Increase Engagement", "Deliver interactive learning experiences that encourage participation and knowledge retention."],
-  ["Save Administrative Time", "Automate training assignments, tracking, reminders, and reporting processes."],
-  ["Measure Effectiveness", "Track progress and evaluate the impact of training programs with actionable analytics."]
+  ["Improve Security Awareness"],
+  ["Strengthen Compliance"],
+  ["Reduce Human Risk"],
+  ["Increase Engagement"],
+  ["Save Administrative Time"],
+  ["Measure Effectiveness"]
 ];
 
-const processSteps = [
-  ["Assign Training Programs", "Create and assign training modules based on employee roles, departments, or compliance requirements."],
-  ["Deliver Interactive Learning", "Employees complete cybersecurity awareness courses, assessments, and learning activities through the platform."],
-  ["Track Progress", "Monitor participation, completion rates, and performance through centralized dashboards."],
-  ["Generate Reports", "Access detailed training reports for management review, audits, and compliance purposes."],
-  ["Continuously Improve", "Use analytics and feedback to enhance awareness programs and address knowledge gaps."]
-];
+
 
 const faqs = [
   ["What is SC-LMS?", "SC-LMS is a Security Compliance Learning Management System that helps organizations deliver, manage, and track cybersecurity awareness and compliance training."],
@@ -177,7 +170,7 @@ function App() {
         <div className="absolute -left-24 bottom-0 h-80 w-80 rounded-full bg-rose-100 blur-3xl" />
 
         <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-8">
-          <div />
+          <div /> 
           <nav className="hidden items-center gap-8 text-sm text-slate-700 md:flex">
             <a href="#why">Why LMS</a>
             <a href="#training">How It Works</a>
@@ -195,10 +188,7 @@ function App() {
 
         <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-6 pb-20 pt-12 lg:grid-cols-[1.02fr_0.98fr] lg:px-8 lg:pb-24 lg:pt-20">
           <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-red-200 bg-white/80 px-4 py-2 text-sm text-red-800 shadow-sm">
-              <Sparkles className="h-4 w-4 text-cyber" />
-              SC-MSAP Learning Management System
-            </div>
+            
             <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-normal md:text-6xl">
               Security compliance learning for a stronger workforce.
             </h1>
@@ -323,14 +313,13 @@ function App() {
               SC-LMS brings content, tracking, assessment, notifications, analytics, and reporting into a centralized learning platform.
             </p>
           </div>
-          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {features.map(({ title, body, icon: Icon }) => (
-              <article key={title} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-cyber/60 hover:shadow-md">
-                <div className="flex h-11 w-11 items-center justify-center rounded-md bg-navy text-cyber">
+              <article key={title} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-cyber/60 hover:shadow-md">
+                <div className="flex h-9 w-9 items-center justify-center rounded-md bg-navy text-cyber">
                   <Icon className="h-5 w-5" />
                 </div>
-                <h3 className="mt-5 text-lg font-semibold">{title}</h3>
-                <p className="mt-3 leading-7 text-slate-600">{body}</p>
+                <h3 className="mt-4 text-lg font-semibold">{title}</h3>
               </article>
             ))}
           </div>
@@ -346,37 +335,18 @@ function App() {
               Beyond delivering training, SC-LMS is built to improve security behavior while saving administrative time.
             </p>
           </div>
-          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {platformBenefits.map(([title, body]) => (
-              <div key={title} className="rounded-lg border border-white/10 bg-white/[0.06] p-5">
-                <CheckCircle2 className="h-5 w-5 text-mint" />
-                <h3 className="mt-4 font-semibold">{title}</h3>
-                <p className="mt-2 leading-7 text-slate-300">{body}</p>
-              </div>
-            ))}
-          </div>
+       <div className="mt-10 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+  {platformBenefits.map(([title, body]) => (
+    <div key={title} className="rounded-lg border border-white/10 bg-white/[0.06] p-4">
+      <CheckCircle2 className="h-5 w-5 text-mint" />
+      <h3 className="mt-3 font-semibold">{title}</h3>
+    </div>
+  ))}
+</div>    
         </div>
       </section>
 
-      <section className="bg-white py-16">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-azure">Process</p>
-            <h2 className="mt-3 text-3xl font-bold md:text-4xl">From assignment to continuous improvement.</h2>
-          </div>
-          <div className="mt-10 grid gap-5 lg:grid-cols-5">
-            {processSteps.map(([title, body], index) => (
-              <article key={title} className="rounded-lg border border-red-100 bg-white p-5 shadow-sm">
-                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-red-50 font-bold text-azure">
-                  {index + 1}
-                </div>
-                <h3 className="mt-5 font-semibold">{title}</h3>
-                <p className="mt-3 text-sm leading-6 text-slate-600">{body}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+      
 
       <section id="faq" className="bg-frost py-16">
         <div className="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8">
