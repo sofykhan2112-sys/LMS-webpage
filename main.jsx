@@ -1,5 +1,7 @@
-import React from "react";
+
+import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
+
 import {
   ArrowRight,
   BarChart3,
@@ -18,8 +20,85 @@ import {
   UsersRound,
   Zap
 } from "lucide-react";
-import "./styles.css";
 
+/* -------------------------------------------------------------------- */
+/* Design tokens (from tailwind.config.js + styles.css)                  */
+/* -------------------------------------------------------------------- */
+const colors = {
+  ink: "#190707",
+  navy: "#7f1d1d",
+  cyber: "#dc2626",
+  cyberHover: "#b91c1c", // hover:bg-red-700
+  azure: "#ef4444",
+  mint: "#fff1f2",
+  frost: "#fff7f7",
+  white: "#ffffff",
+  slate50: "#f8fafc",
+  slate100: "#f1f5f9",
+  slate200: "#e2e8f0",
+  slate300: "#cbd5e1",
+  slate500: "#64748b",
+  slate600: "#475569",
+  slate700: "#334155",
+  slate900: "#0f172a",
+  slate950: "#020617",
+  red50: "#fef2f2",
+  red100: "#fee2e2",
+  red200: "#fecaca",
+  red300: "#fca5a5",
+  red400: "#f87171",
+  red700: "#b91c1c",
+  rose50: "#fff1f2",
+  rose100: "#ffe4e6"
+};
+
+const shadowGlow = "0 24px 80px rgba(220, 38, 38, 0.2)";
+const shadowSm = "0 1px 2px 0 rgb(0 0 0 / 0.05)";
+const shadowMd = "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)";
+
+/* -------------------------------------------------------------------- */
+/* Responsive helper (replaces Tailwind's sm:/md:/lg: prefixes)          */
+/* -------------------------------------------------------------------- */
+function useBreakpoint() {
+  const [size, setSize] = useState(() => ({
+    sm: typeof window !== "undefined" ? window.innerWidth >= 640 : false,
+    md: typeof window !== "undefined" ? window.innerWidth >= 768 : false,
+    lg: typeof window !== "undefined" ? window.innerWidth >= 1024 : false
+  }));
+
+  useEffect(() => {
+    function onResize() {
+      setSize({
+        sm: window.innerWidth >= 640,
+        md: window.innerWidth >= 768,
+        lg: window.innerWidth >= 1024
+      });
+    }
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  return size;
+}
+
+/* -------------------------------------------------------------------- */
+/* Global (formerly :root / html / body / a) reset — applied via effect  */
+/* since those selectors target elements outside the React tree.        */
+/* -------------------------------------------------------------------- */
+function useGlobalBaseStyles() {
+  useEffect(() => {
+    document.documentElement.style.scrollBehavior = "smooth";
+    document.body.style.margin = "0";
+    document.body.style.fontFamily =
+      'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    document.body.style.color = colors.slate900;
+    document.body.style.background = colors.slate50;
+  }, []);
+}
+
+/* -------------------------------------------------------------------- */
+/* Data                                                                  */
+/* -------------------------------------------------------------------- */
 const whyLms = [
   "Centralizes all training content, records, and progress in one place instead of scattered spreadsheets, emails, and folders.",
   "Makes cybersecurity awareness consistent across the entire organization, regardless of location or department.",
@@ -48,45 +127,14 @@ const employeeBenefits = [
 ];
 
 const features = [
-  {
-    title: "Centralized Learning Platform",
-   
-    icon: BookOpenCheck
-  },
-  {
-    title: "Role-Based Training",
-    
-    icon: BrainCircuit
-  },
-  {
-    title: "Real-Time Progress Tracking",
-    
-    icon: BarChart3
-  },
-  {
-    title: "Assessments & Quizzes",
-    icon: ClipboardCheck
-  },
-  {
-    title: "Compliance Management",
-    
-    icon: FileText
-  },
-  {
-    title: "Automated Notifications",
-   
-    icon: Zap
-  },
-  {
-    title: "Anywhere, Anytime Learning",
-   
-    icon: UsersRound
-  },
-  {
-    title: "Analytics & Reporting",
-    
-    icon: Languages
-  }
+  { title: "Centralized Learning Platform", icon: BookOpenCheck },
+  { title: "Role-Based Training", icon: BrainCircuit },
+  { title: "Real-Time Progress Tracking", icon: BarChart3 },
+  { title: "Assessments & Quizzes", icon: ClipboardCheck },
+  { title: "Compliance Management", icon: FileText },
+  { title: "Automated Notifications", icon: Zap },
+  { title: "Anywhere, Anytime Learning", icon: UsersRound },
+  { title: "Analytics & Reporting", icon: Languages }
 ];
 
 const platformBenefits = [
@@ -97,8 +145,6 @@ const platformBenefits = [
   ["Save Administrative Time"],
   ["Measure Effectiveness"]
 ];
-
-
 
 const faqs = [
   ["What is SC-LMS?", "SC-LMS is a Security Compliance Learning Management System that helps organizations deliver, manage, and track cybersecurity awareness and compliance training."],
@@ -118,41 +164,140 @@ const whyChoose = [
   "Supports continuous learning culture"
 ];
 
-function DashboardCard() {
+/* -------------------------------------------------------------------- */
+/* Shared link/button hover helper                                       */
+/* -------------------------------------------------------------------- */
+function withHover(baseStyle, hoverStyle) {
+  return {
+    style: baseStyle,
+    onMouseEnter: (e) => Object.assign(e.currentTarget.style, hoverStyle),
+    onMouseLeave: (e) => Object.assign(e.currentTarget.style, baseStyle)
+  };
+}
+
+/* -------------------------------------------------------------------- */
+/* Dashboard card                                                        */
+/* -------------------------------------------------------------------- */
+function DashboardCard({ bp }) {
   return (
-    <div className="rounded-lg border border-red-100 bg-white/70 p-4 shadow-glow backdrop-blur">
-      <div className="rounded-md bg-white p-5 text-slate-900 shadow-sm">
-        <div className="mb-5 flex items-center justify-between">
+    <div
+      style={{
+        borderRadius: "0.5rem",
+        border: `1px solid ${colors.red100}`,
+        background: "rgba(255,255,255,0.7)",
+        padding: "1rem",
+        boxShadow: shadowGlow,
+        backdropFilter: "blur(8px)"
+      }}
+    >
+      <div
+        style={{
+          borderRadius: "0.375rem",
+          background: colors.white,
+          padding: "1.25rem",
+          color: colors.slate900,
+          boxShadow: shadowSm
+        }}
+      >
+        <div
+          style={{
+            marginBottom: "1.25rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between"
+          }}
+        >
           <div>
-            <p className="text-sm text-slate-500">Human Risk Dashboard</p>
-            <p className="text-2xl font-bold">Training Impact</p>
+            <p style={{ fontSize: "0.875rem", lineHeight: "1.25rem", color: colors.slate500, margin: 0 }}>
+              Human Risk Dashboard
+            </p>
+            <p style={{ fontSize: "1.5rem", lineHeight: "2rem", fontWeight: 700, margin: 0 }}>
+              Training Impact
+            </p>
           </div>
-          <div className="rounded-md bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">Live</div>
+          <div
+            style={{
+              borderRadius: "0.375rem",
+              background: colors.red50,
+              padding: "0.5rem 0.75rem",
+              fontSize: "0.875rem",
+              lineHeight: "1.25rem",
+              fontWeight: 600,
+              color: colors.red700
+            }}
+          >
+            Live
+          </div>
         </div>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: bp.sm ? "repeat(3, minmax(0, 1fr))" : "repeat(1, minmax(0, 1fr))",
+            gap: "1rem"
+          }}
+        >
           {[
-            ["86%", "Completion", "bg-cyber"],
-            ["42%", "Risk drop", "bg-red-400"],
-            ["312", "Certificates", "bg-red-300"]
-          ].map(([value, label, color]) => (
-            <div key={label} className="rounded-md border border-red-100 bg-red-50/60 p-4">
-              <p className="text-2xl font-bold">{value}</p>
-              <p className="mt-1 text-sm text-slate-500">{label}</p>
-              <div className="mt-4 h-2 rounded-full bg-red-100">
-                <div className={`h-2 rounded-full ${color}`} style={{ width: value === "312" ? "72%" : value }} />
+            ["86%", "Completion", colors.cyber],
+            ["42%", "Risk drop", colors.red400],
+            ["312", "Certificates", colors.red300]
+          ].map(([value, label, barColor]) => (
+            <div
+              key={label}
+              style={{
+                borderRadius: "0.375rem",
+                border: `1px solid ${colors.red100}`,
+                background: "rgba(254,242,242,0.6)",
+                padding: "1rem"
+              }}
+            >
+              <p style={{ fontSize: "1.5rem", lineHeight: "2rem", fontWeight: 700, margin: 0 }}>{value}</p>
+              <p style={{ marginTop: "0.25rem", fontSize: "0.875rem", lineHeight: "1.25rem", color: colors.slate500 }}>
+                {label}
+              </p>
+              <div style={{ marginTop: "1rem", height: "0.5rem", borderRadius: "9999px", background: colors.red100 }}>
+                <div
+                  style={{
+                    height: "0.5rem",
+                    borderRadius: "9999px",
+                    background: barColor,
+                    width: value === "312" ? "72%" : value
+                  }}
+                />
               </div>
             </div>
           ))}
         </div>
-        <div className="mt-5 rounded-md border border-red-100 bg-white p-4">
-          <div className="mb-4 flex items-center justify-between">
-            <p className="font-semibold">Active learning paths</p>
-            <BarChart3 className="h-5 w-5 text-cyber" />
+        <div
+          style={{
+            marginTop: "1.25rem",
+            borderRadius: "0.375rem",
+            border: `1px solid ${colors.red100}`,
+            background: colors.white,
+            padding: "1rem"
+          }}
+        >
+          <div style={{ marginBottom: "1rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <p style={{ fontWeight: 600, margin: 0 }}>Active learning paths</p>
+            <BarChart3 style={{ height: "1.25rem", width: "1.25rem", color: colors.cyber }} />
           </div>
-          {["Phishing Defense", "Password Hygiene", "Data Protection", "Incident Reporting"].map((item, index) => (
-            <div key={item} className="mb-3 grid grid-cols-[1fr_auto] items-center gap-4 last:mb-0">
-              <span className="text-sm text-slate-700">{item}</span>
-              <span className="text-sm font-semibold text-red-700">{[91, 78, 84, 69][index]}%</span>
+          {["Phishing Defense", "Password Hygiene", "Data Protection", "Incident Reporting"].map((item, index, arr) => (
+            <div
+              key={item}
+              style={{
+                marginBottom: index === arr.length - 1 ? 0 : "0.75rem",
+                display: "grid",
+                gridTemplateColumns: "1fr auto",
+                alignItems: "center",
+                gap: "1rem",
+                paddingTop: "0.75rem",
+                paddingBottom: index === arr.length - 1 ? 0 : "0.75rem",
+                borderBottom: index === arr.length - 1 ? "none" : `1px solid ${colors.slate100}`
+              }}
+            >
+              <span style={{ fontSize: "0.875rem", lineHeight: "1.25rem", color: colors.slate700 }}>{item}</span>
+              <span style={{ fontSize: "0.875rem", lineHeight: "1.25rem", fontWeight: 600, color: colors.red700 }}>
+                {[91, 78, 84, 69][index]}%
+              </span>
             </div>
           ))}
         </div>
@@ -161,241 +306,790 @@ function DashboardCard() {
   );
 }
 
+/* -------------------------------------------------------------------- */
+/* App                                                                    */
+/* -------------------------------------------------------------------- */
 function App() {
-  return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
-      <section className="relative overflow-hidden bg-gradient-to-br from-white via-rose-50 to-red-100 text-ink">
-        <div className="absolute inset-0 grid-pattern opacity-50" />
-        <div className="absolute -right-32 top-10 h-96 w-96 rounded-full bg-red-200/70 blur-3xl" />
-        <div className="absolute -left-24 bottom-0 h-80 w-80 rounded-full bg-rose-100 blur-3xl" />
+  const bp = useBreakpoint();
+  useGlobalBaseStyles();
 
-        <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-8">
-          <div /> 
-          <nav className="hidden items-center gap-8 text-sm text-slate-700 md:flex">
-            <a href="#why">Why LMS</a>
-            <a href="#training">How It Works</a>
-            <a href="#features">Features</a>
-            <a href="#faq">FAQ</a>
-          </nav>
-          <a
-            href="#demo"
-            className="inline-flex items-center gap-2 rounded-md bg-cyber px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700"
+  const ctaBase = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "0.5rem",
+    borderRadius: "0.375rem",
+    background: colors.cyber,
+    padding: "0.5rem 1rem",
+    fontSize: "0.875rem",
+    lineHeight: "1.25rem",
+    fontWeight: 600,
+    color: colors.white,
+    boxShadow: shadowSm,
+    textDecoration: "none",
+    transition: "background-color 0.15s ease"
+  };
+
+  const getDemoBase = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "0.5rem",
+    borderRadius: "0.375rem",
+    background: colors.cyber,
+    padding: "0.75rem 1.5rem",
+    fontWeight: 600,
+    color: colors.white,
+    boxShadow: shadowSm,
+    textDecoration: "none",
+    transition: "background-color 0.15s ease"
+  };
+
+  const seeHowBase = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "0.5rem",
+    borderRadius: "0.375rem",
+    border: `1px solid ${colors.red200}`,
+    background: "rgba(255,255,255,0.7)",
+    padding: "0.75rem 1.5rem",
+    fontWeight: 600,
+    color: colors.red700 === colors.red700 ? "#991b1b" : "#991b1b", // text-red-800
+    boxShadow: shadowSm,
+    textDecoration: "none",
+    transition: "background-color 0.15s ease, border-color 0.15s ease"
+  };
+
+  const exploreBase = {
+    marginTop: "1.75rem",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "0.5rem",
+    borderRadius: "0.375rem",
+    background: colors.navy,
+    padding: "0.75rem 1.25rem",
+    fontWeight: 600,
+    color: colors.white,
+    textDecoration: "none",
+    transition: "background-color 0.15s ease"
+  };
+
+  const requestDemoBottomBase = {
+    marginTop: "2rem",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "0.5rem",
+    borderRadius: "0.375rem",
+    background: colors.cyber,
+    padding: "0.75rem 1.5rem",
+    fontWeight: 600,
+    color: colors.white,
+    textDecoration: "none",
+    transition: "background-color 0.15s ease"
+  };
+
+  return (
+    <main style={{ minHeight: "100vh", background: colors.slate50, color: colors.slate900 }}>
+      {/* ---------------- Hero ---------------- */}
+      <section
+        style={{
+          position: "relative",
+          overflow: "hidden",
+          background: `linear-gradient(to bottom right, ${colors.white}, ${colors.rose50}, ${colors.red100})`,
+          color: colors.ink
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            opacity: 0.5,
+            backgroundImage:
+              "linear-gradient(rgba(220, 38, 38, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(220, 38, 38, 0.08) 1px, transparent 1px)",
+            backgroundSize: "44px 44px"
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            right: "-8rem",
+            top: "2.5rem",
+            height: "24rem",
+            width: "24rem",
+            borderRadius: "9999px",
+            background: "rgba(254,202,202,0.7)",
+            filter: "blur(64px)"
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            left: "-6rem",
+            bottom: 0,
+            height: "20rem",
+            width: "20rem",
+            borderRadius: "9999px",
+            background: colors.rose100,
+            filter: "blur(64px)"
+          }}
+        />
+
+        <header
+          style={{
+            position: "relative",
+            zIndex: 10,
+            margin: "0 auto",
+            display: "flex",
+            maxWidth: "80rem",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: bp.lg ? "1.25rem 2rem" : "1.25rem 1.5rem"
+          }}
+        >
+          <div />
+          <nav
+            style={{
+              display: bp.md ? "flex" : "none",
+              alignItems: "center",
+              gap: "2rem",
+              fontSize: "0.875rem",
+              lineHeight: "1.25rem",
+              color: colors.slate700
+            }}
           >
+            <a href="#why" style={{ textDecoration: "none", color: "inherit" }}>Why LMS</a>
+            <a href="#training" style={{ textDecoration: "none", color: "inherit" }}>How It Works</a>
+            <a href="#features" style={{ textDecoration: "none", color: "inherit" }}>Features</a>
+            <a href="#faq" style={{ textDecoration: "none", color: "inherit" }}>FAQ</a>
+          </nav>
+          <a href="#demo" {...withHover(ctaBase, { background: colors.cyberHover })}>
             Request Demo
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight style={{ height: "1rem", width: "1rem" }} />
           </a>
         </header>
 
-        <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-6 pb-20 pt-12 lg:grid-cols-[1.02fr_0.98fr] lg:px-8 lg:pb-24 lg:pt-20">
+        <div
+          style={{
+            position: "relative",
+            zIndex: 10,
+            margin: "0 auto",
+            display: "grid",
+            maxWidth: "80rem",
+            alignItems: "center",
+            gap: "3rem",
+            padding: bp.lg
+              ? "3rem 2rem 6rem 2rem"
+              : "3rem 1.5rem 5rem 1.5rem",
+            gridTemplateColumns: bp.lg ? "1.02fr 0.98fr" : "1fr"
+          }}
+        >
           <div>
-            
-            <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-normal md:text-6xl">
+            <h1
+              style={{
+                maxWidth: "48rem",
+                fontSize: bp.md ? "3.75rem" : "2.25rem",
+                lineHeight: bp.md ? "1" : "2.5rem",
+                fontWeight: 700,
+                letterSpacing: "0em",
+                margin: 0
+              }}
+            >
               Security compliance learning for a stronger workforce.
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-700">
+            <p
+              style={{
+                marginTop: "1.5rem",
+                maxWidth: "42rem",
+                fontSize: "1.125rem",
+                lineHeight: "2rem",
+                color: colors.slate700
+              }}
+            >
               Empower your workforce with engaging, role-based cybersecurity training through a centralized learning platform designed to strengthen security awareness, improve compliance readiness, and reduce human risk.
             </p>
-            <div className="fmt-8 flex flex-col gap-3 sm:flex-row">
-              <a
-                href="#demo"
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-cyber px-6 py-3 font-semibold text-white shadow-sm transition hover:bg-red-700"
-              >
+            <div
+              style={{
+                marginTop: "2rem",
+                display: "flex",
+                flexDirection: bp.sm ? "row" : "column",
+                gap: "0.75rem"
+              }}
+            >
+              <a href="#demo" {...withHover(getDemoBase, { background: colors.cyberHover })}>
                 Get a Demo
-                <ArrowRight className="h-5 w-5" />
+                <ArrowRight style={{ height: "1.25rem", width: "1.25rem" }} />
               </a>
               <a
                 href="#training"
-                className="inline-flex items-center justify-center gap-2 rounded-md border border-red-200 bg-white/70 px-6 py-3 font-semibold text-red-800 shadow-sm transition hover:border-red-300 hover:bg-white"
+                {...withHover(seeHowBase, { borderColor: colors.red300, background: colors.white })}
               >
-                <PlayCircle className="h-5 w-5" />
+                <PlayCircle style={{ height: "1.25rem", width: "1.25rem" }} />
                 See how it works
               </a>
             </div>
-            <div className="mt-10 grid max-w-xl grid-cols-3 gap-4">
+            <div
+              style={{
+                marginTop: "2.5rem",
+                display: "grid",
+                maxWidth: "36rem",
+                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                gap: "1rem"
+              }}
+            >
               {[
                 ["Role", "based learning"],
                 ["Audit", "ready records"],
                 ["Any", "device access"]
               ].map(([value, label]) => (
-                <div key={value} className="border-l border-cyber/40 pl-4">
-                  <p className="text-2xl font-bold text-ink">{value}</p>
-                  <p className="text-sm text-slate-600">{label}</p>
+                <div
+                  key={value}
+                  style={{ borderLeft: `1px solid rgba(220,38,38,0.4)`, paddingLeft: "1rem" }}
+                >
+                  <p style={{ fontSize: "1.5rem", lineHeight: "2rem", fontWeight: 700, color: colors.ink, margin: 0 }}>
+                    {value}
+                  </p>
+                  <p style={{ fontSize: "0.875rem", lineHeight: "1.25rem", color: colors.slate600, margin: 0 }}>
+                    {label}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="relative">
-            <div className="rounded-lg border border-red-100 bg-white/70 p-4 shadow-glow backdrop-blur">
+          <div style={{ position: "relative" }}>
+            <div
+              style={{
+                borderRadius: "0.5rem",
+                border: `1px solid ${colors.red100}`,
+                background: "rgba(255,255,255,0.7)",
+                padding: "1rem",
+                boxShadow: shadowGlow,
+                backdropFilter: "blur(8px)"
+              }}
+            >
               <img
                 src="/cyber-lock.png"
                 alt="Cybersecurity lock"
-                className="h-full max-h-[430px] min-h-[340px] w-full rounded-md object-cover shadow-sm"
+                style={{
+                  height: "100%",
+                  maxHeight: "430px",
+                  minHeight: "340px",
+                  width: "100%",
+                  borderRadius: "0.375rem",
+                  objectFit: "cover",
+                  boxShadow: shadowSm
+                }}
               />
             </div>
           </div>
         </div>
       </section>
 
-      <section id="why" className="bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-          <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-azure">Why LMS?</p>
-            <h2 className="mt-3 text-3xl font-bold md:text-4xl">Centralize training, compliance records, and cyber awareness.</h2>
+      {/* ---------------- Why LMS ---------------- */}
+      <section id="why" style={{ background: colors.white }}>
+        <div style={{ margin: "0 auto", maxWidth: "80rem", padding: bp.lg ? "4rem 2rem" : "4rem 1.5rem" }}>
+          <div style={{ maxWidth: "48rem" }}>
+            <p
+              style={{
+                fontSize: "0.875rem",
+                lineHeight: "1.25rem",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.2em",
+                color: colors.azure,
+                margin: 0
+              }}
+            >
+              Why LMS?
+            </p>
+            <h2
+              style={{
+                marginTop: "0.75rem",
+                fontSize: bp.md ? "2.25rem" : "1.875rem",
+                lineHeight: bp.md ? "2.5rem" : "2.25rem",
+                fontWeight: 700
+              }}
+            >
+              Centralize training, compliance records, and cyber awareness.
+            </h2>
           </div>
-          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div
+            style={{
+              marginTop: "2.5rem",
+              display: "grid",
+              gridTemplateColumns: bp.lg
+                ? "repeat(3, minmax(0, 1fr))"
+                : bp.md
+                ? "repeat(2, minmax(0, 1fr))"
+                : "repeat(1, minmax(0, 1fr))",
+              gap: "1.25rem"
+            }}
+          >
             {whyLms.map((item, index) => (
-              <article key={item} className="rounded-lg border border-red-100 bg-slate-50 p-6">
-                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-red-50 font-bold text-azure">
+              <article
+                key={item}
+                style={{
+                  borderRadius: "0.5rem",
+                  border: `1px solid ${colors.red100}`,
+                  background: colors.slate50,
+                  padding: "1.5rem"
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    height: "2.5rem",
+                    width: "2.5rem",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: "0.375rem",
+                    background: colors.red50,
+                    fontWeight: 700,
+                    color: colors.azure
+                  }}
+                >
                   {index + 1}
                 </div>
-                <p className="mt-5 leading-7 text-slate-700">{item}</p>
+                <p style={{ marginTop: "1.25rem", lineHeight: "1.75rem", color: colors.slate700 }}>{item}</p>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="training" className="bg-frost py-16">
-        <div className="mx-auto grid max-w-7xl items-start gap-10 px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
+      {/* ---------------- How LMS is used ---------------- */}
+      <section id="training" style={{ background: colors.frost, padding: "4rem 0" }}>
+        <div
+          style={{
+            margin: "0 auto",
+            display: "grid",
+            maxWidth: "80rem",
+            alignItems: "start",
+            gap: "2.5rem",
+            padding: bp.lg ? "0 2rem" : "0 1.5rem",
+            gridTemplateColumns: bp.lg ? "0.9fr 1.1fr" : "1fr"
+          }}
+        >
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-azure">How LMS is used</p>
-            <h2 className="mt-3 text-3xl font-bold md:text-4xl">A simple operating flow for admins, employees, managers, and compliance teams.</h2>
-            <p className="mt-5 leading-8 text-slate-600">
+            <p
+              style={{
+                fontSize: "0.875rem",
+                lineHeight: "1.25rem",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.2em",
+                color: colors.azure,
+                margin: 0
+              }}
+            >
+              How LMS is used
+            </p>
+            <h2
+              style={{
+                marginTop: "0.75rem",
+                fontSize: bp.md ? "2.25rem" : "1.875rem",
+                lineHeight: bp.md ? "2.5rem" : "2.25rem",
+                fontWeight: 700
+              }}
+            >
+              A simple operating flow for admins, employees, managers, and compliance teams.
+            </h2>
+            <p style={{ marginTop: "1.25rem", lineHeight: "2rem", color: colors.slate600 }}>
               SC-LMS keeps training assignments, reminders, completions, scores, dashboards, and reports in one controlled workflow.
             </p>
-            <a
-              href="#features"
-              className="mt-7 inline-flex items-center gap-2 rounded-md bg-navy px-5 py-3 font-semibold text-white transition hover:bg-azure"
-            >
+            <a href="#features" {...withHover(exploreBase, { background: colors.azure })}>
               Explore features
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight style={{ height: "1rem", width: "1rem" }} />
             </a>
           </div>
-          <div className="rounded-lg border border-red-100 bg-white p-6 shadow-sm">
-            {usageSteps.map((item, index) => (
-              <div key={item} className="flex gap-4 border-b border-slate-100 py-5 first:pt-0 last:border-0 last:pb-0">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-cyber/15 font-bold text-azure">
+          <div
+            style={{
+              borderRadius: "0.5rem",
+              border: `1px solid ${colors.red100}`,
+              background: colors.white,
+              padding: "1.5rem",
+              boxShadow: shadowSm
+            }}
+          >
+            {usageSteps.map((item, index, arr) => (
+              <div
+                key={item}
+                style={{
+                  display: "flex",
+                  gap: "1rem",
+                  borderBottom: index === arr.length - 1 ? "none" : `1px solid ${colors.slate100}`,
+                  padding: "1.25rem 0",
+                  paddingTop: index === 0 ? 0 : "1.25rem",
+                  paddingBottom: index === arr.length - 1 ? 0 : "1.25rem"
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    height: "2.5rem",
+                    width: "2.5rem",
+                    flexShrink: 0,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: "0.375rem",
+                    background: "rgba(220,38,38,0.15)",
+                    fontWeight: 700,
+                    color: colors.azure
+                  }}
+                >
                   {index + 1}
                 </div>
-                <p className="leading-7 text-slate-700">{item}</p>
+                <p style={{ lineHeight: "1.75rem", color: colors.slate700, margin: 0 }}>{item}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-white py-16">
-        <div className="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[1fr_1fr] lg:px-8">
+      {/* ---------------- Employee benefits ---------------- */}
+      <section style={{ background: colors.white, padding: "4rem 0" }}>
+        <div
+          style={{
+            margin: "0 auto",
+            display: "grid",
+            maxWidth: "80rem",
+            gap: "2.5rem",
+            padding: bp.lg ? "0 2rem" : "0 1.5rem",
+            gridTemplateColumns: bp.lg ? "1fr 1fr" : "1fr"
+          }}
+        >
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-azure">Employee benefits</p>
-            <h2 className="mt-3 text-3xl font-bold md:text-4xl">Training that feels relevant, practical, and easy to complete.</h2>
+            <p
+              style={{
+                fontSize: "0.875rem",
+                lineHeight: "1.25rem",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.2em",
+                color: colors.azure,
+                margin: 0
+              }}
+            >
+              Employee benefits
+            </p>
+            <h2
+              style={{
+                marginTop: "0.75rem",
+                fontSize: bp.md ? "2.25rem" : "1.875rem",
+                lineHeight: bp.md ? "2.5rem" : "2.25rem",
+                fontWeight: 700
+              }}
+            >
+              Training that feels relevant, practical, and easy to complete.
+            </h2>
           </div>
-          <div className="grid gap-4">
+          <div style={{ display: "grid", gap: "1rem" }}>
             {employeeBenefits.map((item) => (
-              <div key={item} className="flex gap-3 rounded-lg border border-red-100 bg-red-50/40 p-4">
-                <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-azure" />
-                <p className="leading-7 text-slate-700">{item}</p>
+              <div
+                key={item}
+                style={{
+                  display: "flex",
+                  gap: "0.75rem",
+                  borderRadius: "0.5rem",
+                  border: `1px solid ${colors.red100}`,
+                  background: "rgba(254,242,242,0.4)",
+                  padding: "1rem"
+                }}
+              >
+                <CheckCircle2 style={{ marginTop: "0.25rem", height: "1.25rem", width: "1.25rem", flexShrink: 0, color: colors.azure }} />
+                <p style={{ lineHeight: "1.75rem", color: colors.slate700, margin: 0 }}>{item}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="features" className="bg-white py-16">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
-            <div className="max-w-2xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-azure">Key features</p>
-              <h2 className="mt-3 text-3xl font-bold md:text-4xl">Every part of a cybersecurity training program in one platform.</h2>
+      {/* ---------------- Features ---------------- */}
+      <section id="features" style={{ background: colors.white, padding: "4rem 0" }}>
+        <div style={{ margin: "0 auto", maxWidth: "80rem", padding: bp.lg ? "0 2rem" : "0 1.5rem" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: bp.md ? "row" : "column",
+              justifyContent: "space-between",
+              gap: "1.25rem",
+              alignItems: bp.md ? "flex-end" : "stretch"
+            }}
+          >
+            <div style={{ maxWidth: "42rem" }}>
+              <p
+                style={{
+                  fontSize: "0.875rem",
+                  lineHeight: "1.25rem",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.2em",
+                  color: colors.azure,
+                  margin: 0
+                }}
+              >
+                Key features
+              </p>
+              <h2
+                style={{
+                  marginTop: "0.75rem",
+                  fontSize: bp.md ? "2.25rem" : "1.875rem",
+                  lineHeight: bp.md ? "2.5rem" : "2.25rem",
+                  fontWeight: 700
+                }}
+              >
+                Every part of a cybersecurity training program in one platform.
+              </h2>
             </div>
-            <p className="max-w-md leading-7 text-slate-600">
+            <p style={{ maxWidth: "28rem", lineHeight: "1.75rem", color: colors.slate600 }}>
               SC-LMS brings content, tracking, assessment, notifications, analytics, and reporting into a centralized learning platform.
             </p>
           </div>
-          <div className="mt-10 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {features.map(({ title, body, icon: Icon }) => (
-              <article key={title} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-cyber/60 hover:shadow-md">
-                <div className="flex h-9 w-9 items-center justify-center rounded-md bg-navy text-cyber">
-                  <Icon className="h-5 w-5" />
+          <div
+            style={{
+              marginTop: "2.5rem",
+              display: "grid",
+              gridTemplateColumns: bp.lg
+                ? "repeat(3, minmax(0, 1fr))"
+                : bp.md
+                ? "repeat(2, minmax(0, 1fr))"
+                : "repeat(1, minmax(0, 1fr))",
+              gap: "0.75rem"
+            }}
+          >
+            {features.map(({ title, icon: Icon }) => (
+              <article
+                key={title}
+                style={{
+                  borderRadius: "0.5rem",
+                  border: `1px solid ${colors.slate200}`,
+                  background: colors.white,
+                  padding: "1.25rem",
+                  boxShadow: shadowSm,
+                  transition: "transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-0.25rem)";
+                  e.currentTarget.style.borderColor = "rgba(220,38,38,0.6)";
+                  e.currentTarget.style.boxShadow = shadowMd;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.borderColor = colors.slate200;
+                  e.currentTarget.style.boxShadow = shadowSm;
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    height: "2.25rem",
+                    width: "2.25rem",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: "0.375rem",
+                    background: colors.navy,
+                    color: colors.cyber
+                  }}
+                >
+                  <Icon style={{ height: "1.25rem", width: "1.25rem" }} />
                 </div>
-                <h3 className="mt-4 text-lg font-semibold">{title}</h3>
+                <h3 style={{ marginTop: "1rem", fontSize: "1.125rem", lineHeight: "1.75rem", fontWeight: 600 }}>
+                  {title}
+                </h3>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="reporting" className="bg-navy py-16 text-white">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+      {/* ---------------- SC-LMS benefits ---------------- */}
+      <section id="reporting" style={{ background: colors.navy, padding: "4rem 0", color: colors.white }}>
+        <div style={{ margin: "0 auto", maxWidth: "80rem", padding: bp.lg ? "0 2rem" : "0 1.5rem" }}>
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyber">SC-LMS benefits</p>
-            <h2 className="mt-3 max-w-3xl text-3xl font-bold md:text-4xl">Move the metrics that matter: awareness, compliance, risk, and engagement.</h2>
-            <p className="mt-5 max-w-3xl leading-8 text-slate-300">
+            <p
+              style={{
+                fontSize: "0.875rem",
+                lineHeight: "1.25rem",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.2em",
+                color: colors.cyber,
+                margin: 0
+              }}
+            >
+              SC-LMS benefits
+            </p>
+            <h2
+              style={{
+                marginTop: "0.75rem",
+                maxWidth: "48rem",
+                fontSize: bp.md ? "2.25rem" : "1.875rem",
+                lineHeight: bp.md ? "2.5rem" : "2.25rem",
+                fontWeight: 700
+              }}
+            >
+              Move the metrics that matter: awareness, compliance, risk, and engagement.
+            </h2>
+            <p style={{ marginTop: "1.25rem", maxWidth: "48rem", lineHeight: "2rem", color: colors.slate300 }}>
               Beyond delivering training, SC-LMS is built to improve security behavior while saving administrative time.
             </p>
           </div>
-       <div className="mt-10 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-  {platformBenefits.map(([title, body]) => (
-    <div key={title} className="rounded-lg border border-white/10 bg-white/[0.06] p-4">
-      <CheckCircle2 className="h-5 w-5 text-mint" />
-      <h3 className="mt-3 font-semibold">{title}</h3>
-    </div>
-  ))}
-</div>    
+          <div
+            style={{
+              marginTop: "2.5rem",
+              display: "grid",
+              gridTemplateColumns: bp.lg
+                ? "repeat(3, minmax(0, 1fr))"
+                : bp.md
+                ? "repeat(2, minmax(0, 1fr))"
+                : "repeat(1, minmax(0, 1fr))",
+              gap: "0.75rem"
+            }}
+          >
+            {platformBenefits.map(([title]) => (
+              <div
+                key={title}
+                style={{
+                  borderRadius: "0.5rem",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  background: "rgba(255,255,255,0.06)",
+                  padding: "1rem"
+                }}
+              >
+                <CheckCircle2 style={{ height: "1.25rem", width: "1.25rem", color: colors.mint }} />
+                <h3 style={{ marginTop: "0.75rem", fontWeight: 600, margin: "0.75rem 0 0 0" }}>{title}</h3>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      
-
-      <section id="faq" className="bg-frost py-16">
-        <div className="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8">
+      {/* ---------------- FAQ ---------------- */}
+      <section id="faq" style={{ background: colors.frost, padding: "4rem 0" }}>
+        <div
+          style={{
+            margin: "0 auto",
+            display: "grid",
+            maxWidth: "80rem",
+            gap: "2.5rem",
+            padding: bp.lg ? "0 2rem" : "0 1.5rem",
+            gridTemplateColumns: bp.lg ? "0.8fr 1.2fr" : "1fr"
+          }}
+        >
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-azure">Frequently asked questions</p>
-            <h2 className="mt-3 text-3xl font-bold md:text-4xl">Common SC-LMS questions.</h2>
+            <p
+              style={{
+                fontSize: "0.875rem",
+                lineHeight: "1.25rem",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.2em",
+                color: colors.azure,
+                margin: 0
+              }}
+            >
+              Frequently asked questions
+            </p>
+            <h2
+              style={{
+                marginTop: "0.75rem",
+                fontSize: bp.md ? "2.25rem" : "1.875rem",
+                lineHeight: bp.md ? "2.5rem" : "2.25rem",
+                fontWeight: 700
+              }}
+            >
+              Common SC-LMS questions.
+            </h2>
           </div>
-          <div className="grid gap-4">
+          <div style={{ display: "grid", gap: "1rem" }}>
             {faqs.map(([question, answer]) => (
-              <article key={question} className="rounded-lg border border-red-100 bg-white p-5 shadow-sm">
-                <h3 className="font-semibold text-slate-950">{question}</h3>
-                <p className="mt-3 leading-7 text-slate-600">{answer}</p>
+              <article
+                key={question}
+                style={{
+                  borderRadius: "0.5rem",
+                  border: `1px solid ${colors.red100}`,
+                  background: colors.white,
+                  padding: "1.25rem",
+                  boxShadow: shadowSm
+                }}
+              >
+                <h3 style={{ fontWeight: 600, color: colors.slate950, margin: 0 }}>{question}</h3>
+                <p style={{ marginTop: "0.75rem", lineHeight: "1.75rem", color: colors.slate600 }}>{answer}</p>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="demo" className="bg-white py-16">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="grid items-center gap-8 rounded-lg bg-ink px-6 py-10 text-white md:px-10 lg:grid-cols-[0.85fr_1.15fr]">
-            <div className="text-center lg:text-left">
-              <GraduationCap className="mx-auto h-12 w-12 text-cyber lg:mx-0" />
-              <h2 className="mt-5 max-w-2xl text-3xl font-bold md:text-4xl">Launch a branded LMS for cybersecurity awareness.</h2>
-              <p className="mt-4 max-w-2xl leading-8 text-slate-300">
+      {/* ---------------- Demo CTA ---------------- */}
+      <section id="demo" style={{ background: colors.white, padding: "4rem 0" }}>
+        <div style={{ margin: "0 auto", maxWidth: "80rem", padding: bp.lg ? "0 2rem" : "0 1.5rem" }}>
+          <div
+            style={{
+              display: "grid",
+              alignItems: "center",
+              gap: "2rem",
+              borderRadius: "0.5rem",
+              background: colors.ink,
+              padding: bp.md ? "2.5rem" : "2.5rem 1.5rem",
+              color: colors.white,
+              gridTemplateColumns: bp.lg ? "0.85fr 1.15fr" : "1fr"
+            }}
+          >
+            <div style={{ textAlign: bp.lg ? "left" : "center" }}>
+              <GraduationCap
+                style={{
+                  margin: bp.lg ? "0" : "0 auto",
+                  height: "3rem",
+                  width: "3rem",
+                  color: colors.cyber
+                }}
+              />
+              <h2
+                style={{
+                  marginTop: "1.25rem",
+                  maxWidth: "42rem",
+                  fontSize: bp.md ? "2.25rem" : "1.875rem",
+                  lineHeight: bp.md ? "2.5rem" : "2.25rem",
+                  fontWeight: 700
+                }}
+              >
+                Launch a branded LMS for cybersecurity awareness.
+              </h2>
+              <p style={{ marginTop: "1rem", maxWidth: "42rem", lineHeight: "2rem", color: colors.slate300 }}>
                 Train people, reduce human risk and keep compliance evidence ready from one Risqora Secure experience.
               </p>
-              <div className="mt-6 grid gap-2 text-left sm:grid-cols-2">
+              <div
+                style={{
+                  marginTop: "1.5rem",
+                  display: "grid",
+                  gap: "0.5rem",
+                  textAlign: "left",
+                  gridTemplateColumns: bp.sm ? "repeat(2, minmax(0, 1fr))" : "1fr"
+                }}
+              >
                 {whyChoose.map((item) => (
-                  <div key={item} className="flex items-center gap-2 text-sm text-slate-200">
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-cyber" />
+                  <div key={item} style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", lineHeight: "1.25rem", color: colors.slate200 }}>
+                    <CheckCircle2 style={{ height: "1rem", width: "1rem", flexShrink: 0, color: colors.cyber }} />
                     <span>{item}</span>
                   </div>
                 ))}
               </div>
               <a
                 href="mailto:support@risqorasecure.com"
-                className="mt-8 inline-flex items-center justify-center gap-2 rounded-md bg-cyber px-6 py-3 font-semibold text-white transition hover:bg-red-700"
+                {...withHover(requestDemoBottomBase, { background: colors.cyberHover })}
               >
                 Request a Demo
-                <ArrowRight className="h-5 w-5" />
+                <ArrowRight style={{ height: "1.25rem", width: "1.25rem" }} />
               </a>
             </div>
-            <DashboardCard />
+            <DashboardCard bp={bp} />
           </div>
         </div>
       </section>
     </main>
   );
 }
-
+export default App;
 createRoot(document.getElementById("root")).render(<App />);
